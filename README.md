@@ -1,55 +1,56 @@
 # Aion Launcher
 
-Лаунчер для нашего сервера Aion 4.8. Одна кнопка вместо `start.bat`: находит папку с игрой,
-проверяет, что клиент пропатчен, и запускает его с нужным адресом сервера.
+Launcher for our Aion 4.8 server. One button instead of `start.bat`: it finds the game folder,
+checks that the client is patched, and launches it with the correct server address.
 
-Это **v0** — самый первый рабочий срез. Что он уже умеет:
+This is **v0** — the very first working cut. It already does the following:
 
-- находит папку игры (из `launcher.json`, из запомненного пути или рядом с собой);
-- проверяет `bin32\version.dll` и `bin64\version.dll` — есть ли они и не перепутаны ли местами;
-- при желании сам скачивает официальный патч `version.dll` (сборка v1.5.0) и раскладывает его
-  по `bin32` и `bin64`, сверяя контрольную сумму архива;
-- запускает `bin64\aion.bin -ip:<адрес> -port:2106 -loginex` (с откатом на `bin32`);
-- открывает страницу новостей в браузере;
-- показывает статус сервера («Онлайн · 12 игроков»), если адрес статуса настроен.
+- finds the game folder (from `launcher.json`, from the remembered path, or next to itself);
+- checks `bin32\version.dll` and `bin64\version.dll` to see if they exist and whether they are swapped;
+- optionally downloads the official patch `version.dll` (build v1.5.0) and places it in
+  `bin32` and `bin64`, verifying the archive checksum;
+- launches `bin64\aion.bin -ip:<server-address> -port:2106 -loginex` (with fallback to `bin32`);
+- opens the news page in a browser;
+- displays the server status (“Online · 12 players”) if the status address is configured.
 
-Чего он пока **не** умеет: обновляться сам, тянуть настройки с сайта, показывать список новостей
-внутри окна. Это следующие срезы (v1/v2).
+What it still **does not** do: update itself, pull settings from the website, or show a list of
+news inside the window. Those are planned for the next slices (v1/v2).
 
 ---
 
-## Установка (для игроков)
+## Installation (for players)
 
-1. Скачайте `AionLauncher.exe` и `launcher.json` со страницы
-   [Releases](https://github.com/BenNiks1/aion-launcher/releases).
-2. Положите **оба файла в корень папки с игрой** — туда, где лежат `bin32`, `bin64`, `Data` и `L10N`.
-   Тогда лаунчер найдёт клиент сам, ничего настраивать не нужно.
-3. Запустите `AionLauncher.exe`.
-4. Если написано «Клиент не пропатчен» — нажмите «Установить патч» и дождитесь окончания.
-5. Нажмите «ИГРАТЬ». Учётная запись создаётся автоматически при первом входе: просто придумайте
-   логин и пароль на экране входа.
+1. Download `AionLauncher.exe` and `launcher.json` from the
+   [Releases](https://github.com/BenNiks1/aion-launcher/releases) page.
+2. Place **both files in the root of the game folder** — the folder where `bin32`, `bin64`, `Data`,
+   and `L10N` are located.
+   Then the launcher will find the client automatically, with no manual configuration needed.
+3. Run `AionLauncher.exe`.
+4. If it says “Client is not patched,” click “Install patch” and wait for it to finish.
+5. Click “PLAY.” The account is created automatically on first login: simply choose a login and
+   password on the login screen.
 
-Лаунчер можно положить и в другое место — тогда при первом запуске нажмите «Обзор…» и укажите
-папку игры. Выбор запоминается.
+The launcher can also be placed somewhere else — in that case, on first launch click “Browse…”
+and select the game folder. The choice is remembered.
 
-### Windows покажет предупреждение — это нормально
+### Windows may show a warning — this is normal
 
-Файл не подписан сертификатом (он стоит денег, и на старте сервера мы его не покупаем).
-При первом запуске SmartScreen напишет «Windows защитила ваш компьютер»:
-нажмите **«Подробнее» → «Выполнить в любом случае»**.
+The file is not signed with a certificate (it costs money, and we do not buy one at server startup).
+On first launch, SmartScreen may say “Windows protected your PC”:
+click **“More info” → “Run anyway”**.
 
-Чтобы убедиться, что скачался именно наш файл, сверьте контрольную сумму — она опубликована
-в описании релиза и в файле `SHA256SUMS.txt`. В PowerShell:
+To make sure the file you downloaded is ours, compare the checksum — it is published in the
+release description and in the `SHA256SUMS.txt` file. In PowerShell:
 
 ```powershell
 Get-FileHash .\AionLauncher.exe -Algorithm SHA256
 ```
 
-Скачивайте лаунчер только со страницы Releases этого репозитория.
+Download the launcher only from the Releases page of this repository.
 
-### Настройка `launcher.json`
+### Configuring `launcher.json`
 
-Файл лежит рядом с exe и правится обычным блокнотом:
+The file sits next to the exe and is edited with a regular Notepad:
 
 ```json
 {
@@ -64,78 +65,78 @@ Get-FileHash .\AionLauncher.exe -Algorithm SHA256
 }
 ```
 
-| Ключ | Что это |
+| Key | Meaning |
 | --- | --- |
-| `gameDir` | Папка с игрой. Пусто — лаунчер ищет сам (запомненный путь, затем папка рядом с exe) |
-| `serverHost` | Адрес нашего логин-сервера: IPv4 или доменное имя |
-| `loginPort` | Порт логин-сервера, по умолчанию `2106` |
-| `newsUrl` | Ссылка на новости; пусто — кнопка выключена |
-| `statusUrl` | Ссылка на `status.json` вида `{"online": true, "players": 12}`; пусто — строка статуса скрыта |
-| `prefer32Bit` | `true` — запускать 32-битный клиент (`bin32\aion.bin`) |
-| `patchZipUrl` | Архив с `version.dll` (только `https://`) |
-| `patchZipSha256` | Контрольная сумма архива; при несовпадении установка отменяется |
+| `gameDir` | Game folder. Empty means the launcher will find it automatically (remembered path, then the folder next to the exe) |
+| `serverHost` | Address of our login server: IPv4 or domain name |
+| `loginPort` | Login server port, default `2106` |
+| `newsUrl` | News link; empty disables the button |
+| `statusUrl` | Link to a `status.json` like `{"online": true, "players": 12}`; empty hides the status line |
+| `prefer32Bit` | `true` means launch the 32-bit client (`bin32\aion.bin`) |
+| `patchZipUrl` | Archive containing `version.dll` (only `https://`) |
+| `patchZipSha256` | Archive checksum; installation is canceled if it does not match |
 
-Если файла нет или он повреждён, лаунчер берёт значения по умолчанию — кнопка «ИГРАТЬ» работает всегда.
+If the file is missing or damaged, the launcher uses default values — the “PLAY” button still works.
 
-### Если что-то пошло не так
+### If something goes wrong
 
-| Что видно | Что делать |
+| What you see | What to do |
 | --- | --- |
-| «Папка не найдена» | «Обзор…» и укажите папку, где лежат `bin32`, `bin64`, `Data`, `L10N` |
-| «Клиент не пропатчен» | «Установить патч» либо вручную распакуйте [version-dll.zip](https://github.com/beyond-aion/aion-version-dll/releases) в корень игры |
-| «В bin32 и bin64 лежит один и тот же version.dll» | Это разные файлы. Распакуйте архив заново, не копируйте один в обе папки |
-| «Сервер недоступен» | Сервер выключен или у вас нет сети; в игру всё равно можно попробовать зайти |
-| Игра не запускается | Проверьте, что путь к игре без кириллицы и что антивирус не удалил `version.dll` |
+| “Folder not found” | Click “Browse…” and select the folder that contains `bin32`, `bin64`, `Data`, and `L10N` |
+| “Client is not patched” | Click “Install patch” or manually unpack [version-dll.zip](https://github.com/beyond-aion/aion-version-dll/releases) |
+| “There is the same `version.dll` in both `bin32` and `bin64`” | These are different files. Extract the archive again; do not copy one file into both folders |
+| “Server unavailable” | The server is down or you have no network; you can still try logging in to the game |
+| Game does not start | Check that the game path has no Cyrillic characters and that your antivirus did not remove `version.dll` |
 
 ---
 
-## Для разработчиков
+## For developers
 
-Требуется .NET SDK 8 или новее. Клиент игры для сборки не нужен.
+Requires .NET SDK 8 or newer. The game client is not required for building.
 
 ```bash
-dotnet build AionLauncher.sln                                  # сборка (WinForms собирается и на Linux)
-dotnet test tests/AionLauncher.Core.Tests                       # юнит-тесты, кроссплатформенные
+dotnet build AionLauncher.sln                                  # build (WinForms also builds on Linux)
+dotnet test tests/AionLauncher.Core.Tests                       # unit tests, cross-platform
 dotnet publish src/AionLauncher/AionLauncher.csproj \
   -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
 ```
 
-### Структура
+### Structure
 
-| Проект | Что это |
+| Project | What it is |
 | --- | --- |
-| `src/AionLauncher.Core` | Вся логика: конфиг, поиск папки игры, проверка патча, аргументы запуска, установка патча, разбор статуса. `net8.0`, без Windows-зависимостей и без NuGet-пакетов |
-| `src/AionLauncher` | Окно WinForms, `net8.0-windows`. Только UI |
-| `tests/AionLauncher.Core.Tests` | xUnit по `AionLauncher.Core`. Гоняются на Linux и в CI |
+| `src/AionLauncher.Core` | All logic: config, game folder discovery, patch check, launch arguments, patch installation, etc. |
+| `src/AionLauncher` | WinForms window, `net8.0-windows`. Only the UI |
+| `tests/AionLauncher.Core.Tests` | xUnit for `AionLauncher.Core`. Runs on Linux and in CI |
 
-Логика намеренно отделена от UI: всё, что можно проверить тестом, лежит в `Core` и тестируется
-на любой ОС. В `AionLauncher` остаются только кнопки.
+The logic is intentionally separated from the UI: everything that can be tested is in `Core` and is
+tested on any OS. Only buttons remain in `AionLauncher`.
 
-### Правила, которые нельзя ослаблять
+### Rules that must not be relaxed
 
-Адрес сервера и (в v1) манифест — это внешний ввод. Поэтому:
+The server address and (in v1) the manifest are external input. Therefore:
 
-- аргументы запуска клиента — белый список: только `-ip:<хост>`, `-port:<1..65535>`, `-loginex`
+- client launch arguments are a whitelist: only `-ip:<host>`, `-port:<1..65535>`, and `-loginex`
   (`LaunchArgs`);
-- запускать можно только `bin64\aion.bin` или `bin32\aion.bin`, ничего другого (`LaunchArgs`);
-- любой путь из архива или манифеста обязан разрешаться **внутри** папки игры: никаких `..`,
-  абсолютных путей, букв дисков и UNC (`SafePath`);
-- из архива с патчем распаковываются только `bin32/version.dll` и `bin64/version.dll`;
-- архив скачивается только по `https://`, его SHA256 сверяется с ожидаемым;
-- файлы клиента пишутся через временный файл и `File.Move` — прерванная установка не оставит
-  обрезанный `version.dll` (`AtomicFile`);
-- в браузере открываются только `http://` и `https://` адреса.
+- only `bin64\aion.bin` or `bin32\aion.bin` may be launched, nothing else (`LaunchArgs`);
+- any path from the archive or manifest must resolve **inside** the game folder: no `..`,
+  absolute paths, drive letters, or UNC paths (`SafePath`);
+- from the patch archive, only `bin32/version.dll` and `bin64/version.dll` are extracted;
+- the archive is downloaded only via `https://`, and its SHA256 is checked against the expected value;
+- client files are written via a temporary file and `File.Move` — an interrupted installation will not
+  leave a truncated `version.dll` (`AtomicFile`);
+- browser URLs are restricted to `http://` and `https://`.
 
-Каждое из этих правил закрыто тестом. Если правило меняется — сначала меняется тест.
+Each of these rules is covered by tests. If a rule changes, the test must change first.
 
 ### CI
 
-`.github/workflows/build.yml` на `windows-latest`: restore → build → test → `dotnet publish`
-(self-contained, single-file, win-x64) → артефакт `AionLauncher-win-x64`. По тегу `v*` дополнительно
-создаётся GitHub Release с `AionLauncher.exe`, `launcher.json` и `SHA256SUMS.txt`.
+`.github/workflows/build.yml` runs on `windows-latest`: restore → build → test → `dotnet publish`
+(self-contained, single-file, win-x64) → artifact `AionLauncher-win-x64`. On tag `v*`, a GitHub
+Release is also created with `AionLauncher.exe`, `launcher.json`, and `SHA256SUMS.txt`.
 
-## Лицензия
+## License
 
-MIT — см. [LICENSE](LICENSE). Патч клиента `version.dll` берётся из
-[beyond-aion/aion-version-dll](https://github.com/beyond-aion/aion-version-dll) и распространяется
-по своей лицензии; мы его не изменяем.
+MIT — see [LICENSE](LICENSE). The client patch `version.dll` is taken from
+[beyond-aion/aion-version-dll](https://github.com/beyond-aion/aion-version-dll) and is distributed
+under its own license; we do not modify it.
